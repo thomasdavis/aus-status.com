@@ -184,9 +184,20 @@ export function calculateUptime(startDate: Date, endDate: Date): {
   };
 }
 
+// Monthly data interface
+export interface MonthData {
+  year: number;
+  month: number;
+  monthName: string;
+  fullMonthName: string;
+  hasIncident: boolean;
+  incidents: GovernmentIncident[];
+  severity: 'critical' | 'warning' | 'normal';
+}
+
 // Generate monthly data for visualization
-export function generateMonthlyData(startDate: Date, endDate: Date) {
-  const months = [];
+export function generateMonthlyData(startDate: Date, endDate: Date): MonthData[] {
+  const months: MonthData[] = [];
   const current = new Date(startDate);
 
   while (current <= endDate) {
@@ -201,6 +212,8 @@ export function generateMonthlyData(startDate: Date, endDate: Date) {
     const hasConstitutionalCrisis = incidents.some(i => i.type === 'constitutional-crisis');
     const hasServiceOutage = incidents.some(i => i.type === 'service-outage');
 
+    const severity: 'critical' | 'warning' | 'normal' = hasConstitutionalCrisis ? 'critical' : hasServiceOutage ? 'warning' : 'normal';
+
     months.push({
       year: current.getFullYear(),
       month: current.getMonth(),
@@ -208,7 +221,7 @@ export function generateMonthlyData(startDate: Date, endDate: Date) {
       fullMonthName: current.toLocaleDateString('en-AU', { month: 'long' }),
       hasIncident: incidents.length > 0,
       incidents: incidents,
-      severity: hasConstitutionalCrisis ? 'critical' : hasServiceOutage ? 'warning' : 'normal'
+      severity: severity
     });
 
     current.setMonth(current.getMonth() + 1);
